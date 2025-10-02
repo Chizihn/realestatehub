@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { propertyApi } from "@/lib/api";
 import LocationPicker from "@/components/LocationPicker";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Home, Upload, X, Plus } from "lucide-react";
+import { Upload, X, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function NewPropertyPage() {

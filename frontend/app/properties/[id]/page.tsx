@@ -25,7 +25,17 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import Map from "@/components/Map";
+import dynamic from "next/dynamic";
+
+// Dynamically import Map component to avoid SSR issues
+const Map = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="text-gray-500">Loading map...</div>
+    </div>
+  ),
+});
 import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 

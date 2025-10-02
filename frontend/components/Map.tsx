@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+
+// Dynamically import Leaflet to avoid SSR issues
+let L: any;
+if (typeof window !== "undefined") {
+  L = require("leaflet");
+  require("leaflet/dist/leaflet.css");
+}
 import { MapPin, Maximize2, Minimize2, Navigation } from "lucide-react";
 import { Button } from "./ui/Button";
 import LoadingSpinner from "./ui/LoadingSpinner";
@@ -35,12 +40,20 @@ export default function Map({
   showControls = true,
 }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient || !L) return;
+
     // Fix for default markers in Next.js (run only on client)
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -51,7 +64,7 @@ export default function Map({
       shadowUrl:
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
     });
-  }, []);
+  }, [isClient]);
 
   // Custom icons for different marker types
   const createCustomIcon = (
@@ -91,7 +104,7 @@ export default function Map({
   };
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!isClient || !L || !mapRef.current || mapInstanceRef.current) return;
 
     setIsLoading(true);
 
@@ -117,7 +130,7 @@ export default function Map({
 
     // Add click handler for location selection
     if (onLocationSelect && interactive) {
-      map.on("click", async (e) => {
+      map.on("click", async (e: any) => {
         const { lat, lng } = e.latlng;
 
         // Reverse geocoding to get address
@@ -145,7 +158,7 @@ export default function Map({
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [isClient, center, zoom, onLocationSelect, interactive, showControls]);
 
   // Update markers when markers prop changes
   useEffect(() => {
@@ -204,7 +217,7 @@ export default function Map({
 
   // Get user location
   const getUserLocation = () => {
-    if (navigator.geolocation) {
+    if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -235,6 +248,17 @@ export default function Map({
       }
     }, 100);
   };
+
+  // Don't render on server side
+  if (!isClient) {
+    return (
+      <div className={`relative ${className}`} style={{ height }}>
+        <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="text-gray-500">Loading map...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${className}`}>

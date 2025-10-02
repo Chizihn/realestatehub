@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, Search, X } from "lucide-react";
-import Map from "./Map";
+import dynamic from "next/dynamic";
+
+// Dynamically import Map component to avoid SSR issues
+const Map = dynamic(() => import("./Map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="text-gray-500">Loading map...</div>
+    </div>
+  ),
+});
 
 interface LocationPickerProps {
   onLocationSelect: (location: {
@@ -268,12 +278,13 @@ export default function LocationPicker({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            State
+            State *
           </label>
           <select
             value={selectedState}
             onChange={(e) => handleStateChange(e.target.value)}
             className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            required
           >
             <option value="">Select State</option>
             {nigerianStates.map((state) => (
@@ -286,23 +297,51 @@ export default function LocationPicker({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            City
+            City *
           </label>
-          <select
+          <input
+            type="text"
             value={selectedCity}
             onChange={(e) => setSelectedCity(e.target.value)}
-            disabled={!selectedState}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
-          >
-            <option value="">Select City</option>
-            {selectedState &&
-              majorCities[selectedState]?.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-          </select>
+            placeholder="Enter city name"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            required
+          />
         </div>
+      </div>
+
+      {/* Manual Address Input */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Full Address *
+        </label>
+        <textarea
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Enter the complete address..."
+          rows={3}
+          className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          required
+        />
+        {selectedState && selectedCity && searchQuery && (
+          <button
+            type="button"
+            onClick={() => {
+              const location = {
+                lat: 9.0765, // Default Nigeria coordinates
+                lng: 7.3986,
+                address: searchQuery,
+                state: selectedState,
+                city: selectedCity,
+              };
+              setSelectedLocation(location);
+              onLocationSelect(location);
+            }}
+            className="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            Use This Address
+          </button>
+        )}
       </div>
 
       {/* Map */}
@@ -311,24 +350,25 @@ export default function LocationPicker({
           <label className="block text-sm font-medium text-gray-700">
             Click on the map to select exact location
           </label>
-          <Map
-            center={mapCenter}
-            zoom={selectedLocation ? 15 : 10}
-            markers={
-              selectedLocation
-                ? [
-                    {
-                      position: [selectedLocation.lat, selectedLocation.lng],
-                      popup: selectedLocation.address,
-                      title: "Selected Location",
-                    },
-                  ]
-                : []
-            }
-            onLocationSelect={handleMapLocationSelect}
-            height="300px"
-            className="border border-gray-300"
-          />
+          <div className="border border-gray-300 rounded-lg overflow-hidden">
+            <Map
+              center={mapCenter}
+              zoom={selectedLocation ? 15 : 10}
+              markers={
+                selectedLocation
+                  ? [
+                      {
+                        position: [selectedLocation.lat, selectedLocation.lng],
+                        popup: selectedLocation.address,
+                        title: "Selected Location",
+                      },
+                    ]
+                  : []
+              }
+              onLocationSelect={handleMapLocationSelect}
+              height="300px"
+            />
+          </div>
         </div>
       )}
 
