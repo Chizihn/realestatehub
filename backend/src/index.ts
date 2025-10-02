@@ -17,7 +17,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://resh-demo.vercel.app"]
+        ? [`${process.env.FRONTEND_URL}`]
         : ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   })
