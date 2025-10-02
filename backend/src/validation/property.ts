@@ -44,6 +44,7 @@ export const updatePropertySchema = Joi.object({
 });
 
 export const searchSchema = Joi.object({
+  q: Joi.string().optional(), // General search query
   state: Joi.string().optional(),
   city: Joi.string().optional(),
   propertyType: Joi.string().optional().valid("HOUSE", "APARTMENT", "LAND"),

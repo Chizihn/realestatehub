@@ -16,12 +16,19 @@ export class SearchController {
   ) => {
     try {
       const { page, limit, ...filters } = req.query as any;
+      console.log("Search filters received:", filters);
       const result = await this.propertyService.getProperties(filters, {
         page,
         limit,
       });
+      console.log(
+        "Search results:",
+        result.properties.length,
+        "properties found"
+      );
       sendSuccess(res, result);
     } catch (error) {
+      console.error("Search error:", error);
       next(error);
     }
   };

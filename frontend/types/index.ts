@@ -25,6 +25,7 @@ export interface Property {
 }
 
 export interface SearchFilters {
+  q?: string; // General search query
   state?: string;
   city?: string;
   propertyType?: string;

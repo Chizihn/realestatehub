@@ -46,7 +46,9 @@ export default function HomePage() {
     try {
       setLoading(true);
       setError(null);
+      console.log("Searching with filters:", searchFilters);
       const response = await searchApi.search(searchFilters);
+      console.log("Search response:", response.data.data);
       setProperties(response.data.data.properties);
       setPagination(response.data.data.pagination);
 
@@ -94,7 +96,10 @@ export default function HomePage() {
   }, [user]);
 
   const handleFiltersChange = (newFilters: SearchFiltersType) => {
-    setFilters({ ...newFilters, page: 1 });
+    const updatedFilters = { ...newFilters, page: 1 };
+    setFilters(updatedFilters);
+    // Automatically search when filters change
+    fetchProperties(updatedFilters);
   };
 
   const handleSearch = async () => {

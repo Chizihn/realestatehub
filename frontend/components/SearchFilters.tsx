@@ -117,8 +117,13 @@ export default function SearchFilters({
   };
 
   const setPriceRange = (min?: number, max?: number) => {
-    handleFilterChange("minPrice", min);
-    handleFilterChange("maxPrice", max);
+    const newFilters = {
+      ...localFilters,
+      minPrice: min,
+      maxPrice: max,
+    };
+    setLocalFilters(newFilters);
+    onFiltersChange(newFilters);
   };
 
   const hasActiveFilters = Object.keys(localFilters).some(
@@ -149,9 +154,9 @@ export default function SearchFilters({
             type="text"
             placeholder="Search by location, property type, or keyword..."
             className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-            value={localFilters.city || ""}
+            value={localFilters.q || ""}
             onChange={(e) =>
-              handleFilterChange("city", e.target.value || undefined)
+              handleFilterChange("q", e.target.value || undefined)
             }
           />
         </div>
@@ -470,6 +475,14 @@ export default function SearchFilters({
           <span className="text-sm font-medium text-gray-700">
             Active filters:
           </span>
+          {localFilters.q && (
+            <Badge variant="info" className="flex items-center space-x-1">
+              <span>Search: "{localFilters.q}"</span>
+              <button onClick={() => handleFilterChange("q", undefined)}>
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          )}
           {localFilters.state && (
             <Badge variant="info" className="flex items-center space-x-1">
               <span>{localFilters.state}</span>

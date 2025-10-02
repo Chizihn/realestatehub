@@ -39,6 +39,19 @@ export class PropertyRepository {
       status: "ACTIVE",
     };
 
+    // General search query - searches across multiple fields
+    if (filters.q) {
+      where.OR = [
+        { title: { contains: filters.q, mode: "insensitive" } },
+        { description: { contains: filters.q, mode: "insensitive" } },
+        { state: { contains: filters.q, mode: "insensitive" } },
+        { city: { contains: filters.q, mode: "insensitive" } },
+        { neighborhood: { contains: filters.q, mode: "insensitive" } },
+        { address: { contains: filters.q, mode: "insensitive" } },
+        { contactName: { contains: filters.q, mode: "insensitive" } },
+      ];
+    }
+
     if (filters.state)
       where.state = { contains: filters.state, mode: "insensitive" };
     if (filters.city)

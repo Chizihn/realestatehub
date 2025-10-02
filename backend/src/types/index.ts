@@ -15,6 +15,7 @@ export interface PaginationParams {
 }
 
 export interface SearchFilters {
+  q?: string; // General search query
   state?: string;
   city?: string;
   propertyType?: string;
